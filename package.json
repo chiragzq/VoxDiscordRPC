@@ -1,0 +1,27 @@
+{
+  "name": "vox-discord-rpc",
+  "version": "1.0.0",
+  "description": "Enable Discord rich prescense for VOX",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/chiragzq/VoxDiscordRPC.git"
+  },
+  "keywords": [
+    "discord",
+    "discordrpc",
+    "vox"
+  ],
+  "author": "Chirag Kaushik (2019)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chiragzq/VoxDiscordRPC/issues"
+  },
+  "homepage": "https://github.com/chiragzq/VoxDiscordRPC#readme",
+  "dependencies": {
+    "discord-rpc": "^3.0.2"
+  }
+}
