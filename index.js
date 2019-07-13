@@ -1,6 +1,5 @@
 const RPC = require("discord-rpc");
-
-const clientId = "599134311014203402"
+const config = require("./config.json")
 
 const client = new RPC.Client({transport: "ipc"}); 
 
@@ -15,4 +14,4 @@ client.on("ready", () => {
     })}, 15000);
 });
 
-client.login({clientId}).catch(console.error);
+client.login({clientId: config.clientId}).catch(console.error);
