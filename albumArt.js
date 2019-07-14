@@ -1,5 +1,6 @@
 const fs = require("fs");
 const config = require("./config")
+const axios = require("axios");
 
 function getExtension(path) {
     const parts = path.split(".");
@@ -7,38 +8,42 @@ function getExtension(path) {
 }
 
 async function convertImageToBase64(path) {
-    fs.readFile(path, 'base64', (err, data) => {
-        if(err) {
-            throw err;
-        }
-
-        return `data:image/${getExtension(path)};base64,${data}`;
-    });
+    return new Promise((res, rej) => {
+        fs.readFile(path, 'base64', (err, data) => {
+            if(err) {
+                rej(err)
+            }
+    
+            res(`data:image/${getExtension(path)};base64,${data}`);
+        });
+    })
 }
 
-export default async function upload(path, name) {
+module.exports = async (path, name) => {
     if(!config.albumArt.enabled) {
         throw new Error("Album art uploading is disabled.");
     }
 
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `https://discordapp.com/api/v6/oauth2/applications/${config.clientId}/assets`, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Authorization", config.albumArt.authToken);
-
-        xhr.onload = () => {
-            if(xhr.status < 200 || xhr.status >= 300) {
-                reject(xhr.statusText);
+    return new Promise(async (resolve, reject) => {
+        axios({
+            method: "POST",
+            url: `https://discordapp.com/api/v6/oauth2/applications/${config.clientId}/assets`,
+            data: {
+                image: await convertImageToBase64(path),
+                name: name,
+                type: 1
+            },
+            headers: {
+                "Authorization": config.albumArt.authToken,
+                "Content-Type": "application/json"
             }
-
-            resolve(xhr.responseText);
-        }
-
-        xhr.send(JSON.stringify({
-            image: await convertImageToBase64(path),
-            name: name,
-            type: 1
-        }));
+        })
+        .then((resp) => {
+            console.log(resp.response)
+            resolve(resp)
+        })
+        .catch(function(err)  {
+            reject(err);
+        });
     });
 }
