@@ -7,6 +7,10 @@ const fs = require("fs")
 
 const client = new RPC.Client({transport: "ipc"}); 
 
+if (!fs.existsSync("./albumArt")){
+    fs.mkdirSync("./albumArt");
+}
+
 client.on("ready", () => {
     console.log("Ready");
 });

@@ -1,3 +1,8 @@
 node_modules/
 config.json
 albumArt/
+
+.DS_Store
+
+ScriptingBridge/VoxDiscordBridge/Index
+ScriptingBridge/VoxDiscordBridge/Build/Intermediates.noindex
