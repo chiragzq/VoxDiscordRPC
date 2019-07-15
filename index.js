@@ -38,7 +38,7 @@ http.createServer((req, res) => {
 }).listen(38787);
 
 function getKey(artist, album) {
-    return `${artist}-${album}`.substring(0, 32).replace(/ /g, "_").replace(/\$/g, "").toLowerCase();
+    return `${artist}-${album}`.substring(0, 32).replace(/[ \(\)]/g, "_").replace(/\$/g, "").replace(/!/g, "").toLowerCase();
 }
 
 function update(title, artist, album, length, req, res) {
