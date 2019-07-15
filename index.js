@@ -4,6 +4,18 @@ const uploadAlbum = require("./albumArt");
 const http = require("http");
 const urllib = require("url");
 const fs = require("fs")
+const { exec } = require('child_process');
+
+exec("./ScriptingBridge/VoxDiscordBridge/Build/Products/Debug/VoxDiscordBridge", (err, stdout, stderr) => {
+    if (err) {
+      // node couldn't execute the command
+      return;
+    }
+  
+    // the *entire* stdout and stderr (buffered)
+    console.log(`stdout: ${stdout}`);
+    console.log(`stderr: ${stderr}`);
+  });
 
 const client = new RPC.Client({transport: "ipc"}); 
 
