@@ -13,8 +13,6 @@ exec("./ScriptingBridge/VoxDiscordBridge/Build/Products/Debug/VoxDiscordBridge",
     }
   
     // the *entire* stdout and stderr (buffered)
-    console.log(`stdout: ${stdout}`);
-    console.log(`stderr: ${stderr}`);
   });
 
 const client = new RPC.Client({transport: "ipc"}); 
@@ -24,7 +22,7 @@ if (!fs.existsSync("./albumArt")){
 }
 
 client.on("ready", () => {
-    console.log("Ready");
+    console.log("Discord RPC Initialized");
 });
 
 client.login({clientId: config.clientId}).catch(console.error);
@@ -32,7 +30,6 @@ client.login({clientId: config.clientId}).catch(console.error);
 // server to listen for updates from scripting bridge
 http.createServer((req, res) => {
     const url = urllib.parse(req.url, true);
-    console.log(url)
     if(url.pathname != "/") {
         res.writeHead(404);
         res.end("Not found")
@@ -45,9 +42,11 @@ function getKey(artist, album) {
 }
 
 function update(title, artist, album, length, req, res) {
+    console.log(`Now playing ${title} from ${album} by ${artist}`)
     if(config.albumArt.enabled) {
         fs.access(`./albumArt/${artist}/${album}.png`, (err) => {
             if(err) {
+                console.log("Downloading album cover for " + album);
                 if (!fs.existsSync(`./albumArt/${artist}`)){
                     fs.mkdirSync(`./albumArt/${artist}`);
                 }
@@ -70,13 +69,11 @@ function update(title, artist, album, length, req, res) {
                             res.end("updated")
                         })
                         .catch((err) => {
-                            console.log("yeetus")
-                            // console.error(err);
+                            console.error(err);
                         })
                     });
                 });
             } else {
-                console.log(getKey(artist, album))
                 client.setActivity({
                     details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
                     state: "by " + artist,
