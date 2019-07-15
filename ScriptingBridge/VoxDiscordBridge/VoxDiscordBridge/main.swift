@@ -52,10 +52,6 @@ extension SBApplication: VoxApplication { }
 
 private let application: VoxApplication? = SBApplication.init(bundleIdentifier: "com.coppertino.Vox")
 
-let image = application?.artworkImage
-let bitmapImage = image?.representations[0] as! NSBitmapImageRep?
-let pngData = bitmapImage?.representation(using: NSBitmapImageRep.FileType.png, properties: [:])
-
 var previousTitle = ""
 let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) in
     let currentTitle = application!.track ?? "Unknown Title"
@@ -63,9 +59,18 @@ let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) i
         return;
     }
     previousTitle = currentTitle
-    let path = "http://localhost:38787?" + String(format: "title=%@&artist=%@&length=%.1f", currentTitle, application?.artist! ?? "Unknown Artist",  application!.totalTime ?? 0).addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!
+    
+    let image = application?.artworkImage
+    let bitmapImage = image?.representations[0] as! NSBitmapImageRep?
+    print(bitmapImage!.size)
+    let pngData = bitmapImage?.representation(using: NSBitmapImageRep.FileType.png, properties: [:])?.base64EncodedString()
+    
+    let path = "http://localhost:38787?" + String(format: "title=%@&artist=%@&length=%.1f&album=%@", currentTitle, application?.artist! ?? "Unknown Artist", application?.totalTime ?? 0.0, application?.album! ?? "Unknown Album").addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
     let url = URL(string: path)!
-    let request = URLRequest(url: url)
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.addValue("text/plain; charset=us-ascii", forHTTPHeaderField: "Content-Type")
+    request.httpBody = pngData?.data(using: String.Encoding.ascii)!
     print("Updated song: " + currentTitle)
     do {
         let response: AutoreleasingUnsafeMutablePointer<URLResponse?>? = nil

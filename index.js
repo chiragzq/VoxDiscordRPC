@@ -20,23 +20,70 @@ client.login({clientId: config.clientId}).catch(console.error);
 // server to listen for updates from scripting bridge
 http.createServer((req, res) => {
     const url = urllib.parse(req.url, true);
+    console.log(url)
     if(url.pathname != "/") {
         res.writeHead(404);
         res.end("Not found")
     }
-    console.log(url)
-    update(url.query.title, url.query.artist, url.query.length);
-    res.end("updated")
+    update(url.query.title, url.query.artist, url.query.album, url.query.length, req, res);
 }).listen(38787);
 
-function update(title, artist, length) {
-    client.setActivity({
-        details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
-        state: artist,
-        largeImageKey: "trench",
-        largeImageText: "Trench",
-        startTimestamp: Date.now(),//parseInt((Date.now() - 1420070400000) / 1000)
-    });
+function getKey(artist, album) {
+    return `${artist}-${album}`.substring(0, 32).replace(/ /g, "_").replace(/\$/g, "").toLowerCase();
+}
+
+function update(title, artist, album, length, req, res) {
+    if(config.albumArt.enabled) {
+        fs.access(`./albumArt/${artist}/${album}.png`, (err) => {
+            if(err) {
+                if (!fs.existsSync(`./albumArt/${artist}`)){
+                    fs.mkdirSync(`./albumArt/${artist}`);
+                }
+                let body = "";
+                req.on("data", (data) => {
+                    body += data;
+                });
+                req.on("end", () => {
+                    fs.writeFile(`./albumArt/${artist}/${album}.png`, body, 'base64', (err) => {
+                        if(err) throw err;
+                        uploadAlbum(`./albumArt/${artist}/${album}.png`, getKey(artist, album))
+                        .then(() => {
+                            client.setActivity({
+                                details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
+                                state: artist,
+                                largeImageKey: getKey(artist, album),
+                                largeImageText: album,
+                                startTimestamp: Date.now(),
+                            });
+                            res.end("updated")
+                        })
+                        .catch((err) => {
+                            console.log("yeetus")
+                            // console.error(err);
+                        })
+                    });
+                });
+            } else {
+                console.log(getKey(artist, album))
+                client.setActivity({
+                    details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
+                    state: artist,
+                    largeImageKey: getKey(artist, album),
+                    largeImageText: album,
+                    startTimestamp: Date.now(),
+                });
+                res.end("updated")
+            }
+        });
+    } else {
+        client.setActivity({
+            details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
+            state: artist,
+            largeImageText: album,
+            startTimestamp: Date.now(),
+        });
+        res.end("updated")
+    }
 }
 
 function pad(number) {

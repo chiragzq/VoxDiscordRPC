@@ -39,10 +39,11 @@ module.exports = async (path, name) => {
             }
         })
         .then((resp) => {
-            console.log(resp.response)
+            console.log("resolve")
             resolve(resp)
         })
         .catch(function(err)  {
+            console.log(err.response.data)
             reject(err);
         });
     });
