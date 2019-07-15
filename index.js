@@ -38,7 +38,7 @@ http.createServer((req, res) => {
 }).listen(38787);
 
 function getKey(artist, album) {
-    return `${artist}-${album}`.substring(0, 32).replace(/[ \(\)]/g, "_").replace(/\$/g, "").replace(/!/g, "").toLowerCase();
+    return `${artist}-${album}`.substring(0, 32).replace(/[ \(\)]/g, "_").replace(/[\$\.]/g, "").replace(/!/g, "").toLowerCase();
 }
 
 function update(title, artist, album, length, req, res) {
@@ -55,6 +55,7 @@ function update(title, artist, album, length, req, res) {
                     body += data;
                 });
                 req.on("end", () => {
+                    console.log(getKey(artist, album))
                     fs.writeFile(`./albumArt/${artist}/${album}.png`, body, 'base64', (err) => {
                         if(err) throw err;
                         uploadAlbum(`./albumArt/${artist}/${album}.png`, getKey(artist, album))
@@ -69,7 +70,7 @@ function update(title, artist, album, length, req, res) {
                             res.end("updated")
                         })
                         .catch((err) => {
-                            console.error(err);
+                            console.error(err.response.statusText);
                         })
                     });
                 });
