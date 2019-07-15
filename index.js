@@ -62,7 +62,7 @@ function update(title, artist, album, length, req, res) {
                         .then(() => {
                             client.setActivity({
                                 details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
-                                state: artist,
+                                state: "by " + artist,
                                 largeImageKey: getKey(artist, album),
                                 largeImageText: album,
                                 startTimestamp: Date.now(),
@@ -79,7 +79,7 @@ function update(title, artist, album, length, req, res) {
                 console.log(getKey(artist, album))
                 client.setActivity({
                     details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
-                    state: artist,
+                    state: "by " + artist,
                     largeImageKey: getKey(artist, album),
                     largeImageText: album,
                     startTimestamp: Date.now(),
@@ -90,7 +90,7 @@ function update(title, artist, album, length, req, res) {
     } else {
         client.setActivity({
             details: `${title} (${parseInt(length / 60)}:${pad(length % 60)})`,
-            state: artist,
+            state: "by " + artist,
             largeImageText: album,
             startTimestamp: Date.now(),
         });
