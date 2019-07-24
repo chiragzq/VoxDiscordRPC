@@ -60,22 +60,23 @@ var prevPlayState = -100
 let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) in
     let currentTitle = application!.track ?? "Unknown Title"
     
-    let state = application?.playerState?.rawValue
-    if(prevPlayState != state) {
-        prevPlayState = state!
-        print((state == 1 ? "play" : "pause"))
-        let path = "http://localhost:38787/" + (state == 1 ? "play" : "pause")
-        let request = URLRequest(url: URL(string: path)!);
-        do {
-            let response: AutoreleasingUnsafeMutablePointer<URLResponse?>? = nil
-            let data = try NSURLConnection.sendSynchronousRequest(request, returning: response)
-        } catch let error as NSError {
-            print(error.localizedDescription)
-        }
-    }
     if(previousTitle == currentTitle) {
+        let state = application?.playerState?.rawValue
+        if(prevPlayState != state) {
+            prevPlayState = state!
+            print((state == 1 ? "play" : "pause"))
+            let path = "http://localhost:38787/" + (state == 1 ? "play" : "pause")
+            let request = URLRequest(url: URL(string: path)!);
+            do {
+                let response: AutoreleasingUnsafeMutablePointer<URLResponse?>? = nil
+                let data = try NSURLConnection.sendSynchronousRequest(request, returning: response)
+            } catch let error as NSError {
+                print(error.localizedDescription)
+            }
+        }
         return;
     }
+    
     previousTitle = currentTitle
     
     let image = application?.artworkImage
