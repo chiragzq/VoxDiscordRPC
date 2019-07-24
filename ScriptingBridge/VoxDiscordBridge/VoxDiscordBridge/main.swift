@@ -8,19 +8,22 @@
 import ScriptingBridge
 import Cocoa
 
+@objc enum VoxState : Int {
+    case stopped = -1, paused = 0, playing = 1
+}
+
 @objc fileprivate protocol VoxApplication {
     // Track properties
-    @objc optional var uniqueID:     String { get }
     @objc optional var track:        String { get }
     @objc optional var artist:       String { get }
     @objc optional var album:        String { get }
     @objc optional var artworkImage:          NSImage {get}
+    
+    @objc optional var playerState:  VoxState { get }
 
     
-    @objc optional var currentTime:  Double { get }
     @objc optional var totalTime:    Double { get }
     
-    @objc optional func activate()
 
 }
 
@@ -53,8 +56,23 @@ extension SBApplication: VoxApplication { }
 private let application: VoxApplication? = SBApplication.init(bundleIdentifier: "com.coppertino.Vox")
 
 var previousTitle = ""
+var prevPlayState = -100
 let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) in
     let currentTitle = application!.track ?? "Unknown Title"
+    
+    let state = application?.playerState?.rawValue
+    if(prevPlayState != state) {
+        prevPlayState = state!
+        print((state == 1 ? "play" : "pause"))
+        let path = "http://localhost:38787/" + (state == 1 ? "play" : "pause")
+        let request = URLRequest(url: URL(string: path)!);
+        do {
+            let response: AutoreleasingUnsafeMutablePointer<URLResponse?>? = nil
+            let data = try NSURLConnection.sendSynchronousRequest(request, returning: response)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+    }
     if(previousTitle == currentTitle) {
         return;
     }
@@ -62,7 +80,6 @@ let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) i
     
     let image = application?.artworkImage
     let bitmapImage = image?.representations[0] as! NSBitmapImageRep?
-    print(bitmapImage!.size)
     let pngData = bitmapImage?.representation(using: NSBitmapImageRep.FileType.png, properties: [:])?.base64EncodedString()
     
     let path = "http://localhost:38787?" + String(format: "title=%@&artist=%@&length=%.1f&album=%@", currentTitle, application?.artist! ?? "Unknown Artist", application?.totalTime ?? 0.0, application?.album! ?? "Unknown Album").addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
