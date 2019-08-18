@@ -62,10 +62,11 @@ http.createServer((req, res) => {
 }).listen(38787);
 
 function getKey(artist, album) {
-    return `${artist}-${album}`.substring(0, 32).replace(/[ \(\)]/g, "_").replace(/[\$\.]/g, "").replace(/!/g, "").toLowerCase();
+    return `${artist}-${album}`.substring(0, 32).replace(/[ \(\)]/g, "_").replace(/[\$\.]/g, "").replace(/!/g, "").replace(/&/g, "").toLowerCase();
 }
 
 function update(title, artist, album, length, req, res) {
+    album = album.replace(/\((.*?)\)/g, "");
     console.log(`Now playing ${title} from ${album} by ${artist}`)
     if(config.albumArt.enabled) {
         fs.access(`./albumArt/${artist}/${album}.png`, (err) => {

@@ -20,11 +20,11 @@ import Cocoa
     @objc optional var artworkImage:          NSImage {get}
     
     @objc optional var playerState:  VoxState { get }
-
+    
     
     @objc optional var totalTime:    Double { get }
     
-
+    
 }
 
 extension SBApplication: VoxApplication { }
@@ -83,8 +83,18 @@ let timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) i
     let bitmapImage = image?.representations[0] as! NSBitmapImageRep?
     let pngData = bitmapImage?.representation(using: NSBitmapImageRep.FileType.png, properties: [:])?.base64EncodedString()
     
-    let path = "http://localhost:38787?" + String(format: "title=%@&artist=%@&length=%.1f&album=%@", currentTitle, application?.artist! ?? "Unknown Artist", application?.totalTime ?? 0.0, application?.album! ?? "Unknown Album").addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
-    let url = URL(string: path)!
+    var components = URLComponents()
+    components.scheme = "http"
+    components.host = "localhost"
+    components.port = 38787
+    components.path = "/"
+    components.queryItems = [
+        URLQueryItem(name: "title", value: currentTitle),
+        URLQueryItem(name: "artist", value: application?.artist! ?? "Unknown Artist"),
+        URLQueryItem(name: "length", value: String(format: "%f", application?.totalTime ?? 0.0)),
+        URLQueryItem(name: "album", value: application?.album! ?? "Unknown Album")
+    ]
+    let url = components.url!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.addValue("text/plain; charset=us-ascii", forHTTPHeaderField: "Content-Type")
